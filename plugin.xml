@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" 
+        xmlns:android="http://schemas.android.com/apk/res/android" 
+        id="cordova-plugin-mathcalculator" 
+        version="1.0.0">
+   <!--Plugin Name -->     
+   <name>MathCalculator</name>
+   <js-module name="MathCalculator" src="www/MathCalculator.js">
+      <!-- Clobber is a portion through which you access your plugin from outside world-->
+      <clobbers target="MathCalculator" />
+   </js-module>
+   <platform name="android">
+      <config-file parent="/*" target="res/xml/config.xml">
+         <feature name="MathCalculator">
+            <!-- Package name should be always prefers to . not dash - -->
+            <param name="android-package" value="cordova.plugin.mathcalculator.MathCalculator" />
+         </feature>
+      </config-file>
+      <config-file parent="/*" target="AndroidManifest.xml" />
+      <!-- target-dir name should be always prefers to / not dash - -->
+      <source-file src="src/android/MathCalculator.java" target-dir="src/cordova/plugin/mathcalculator/MathCalculator" />
+   </platform>
+</plugin>
