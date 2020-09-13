@@ -16,7 +16,9 @@
             <param name="android-package" value="cordova.plugin.mathcalculator.MathCalculator" />
          </feature>
       </config-file>
-      <config-file parent="/*" target="AndroidManifest.xml" />
+       <config-file target="AndroidManifest.xml" parent="/*">
+            <uses-permission android:name="android.hardware.usb.host"/>
+        </config-file>
       <!-- target-dir name should be always prefers to / not dash - -->
       <source-file src="src/android/MathCalculator.java" target-dir="src/cordova/plugin/mathcalculator/MathCalculator" />
    </platform>
