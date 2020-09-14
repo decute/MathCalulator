@@ -12,9 +12,14 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
-
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Iterator;
+
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 
 /**
  * This class echoes a string called from JavaScript.
@@ -147,7 +152,7 @@ public class MathCalculator extends CordovaPlugin {
            if(deviceFound != null){
                 getPermission(deviceFound); 
                 try{
-                    connection = mUsbManager.openDevice(device);
+                    connection = mUsbManager.openDevice(deviceFound);
                     callbackContext.success("Connection Established Successfully");   
                 }catch (Exception e) {
                     callbackContext.error("Failed to Established the Connection");
@@ -158,13 +163,13 @@ public class MathCalculator extends CordovaPlugin {
          }
     }
 
-    private void sendCommand(String command, CallbackContext callbackContext) {   
+    private void sendCommand(String args, CallbackContext callbackContext) {   
         if(deviceFound==null){
             callbackContext.error("Please Open the USB Connection First");
         }else {
            getPermission(deviceFound);
            if(connection!=null){
-                usbInterface = device.getInterface(0x01);
+                usbInterface = deviceFound.getInterface(0x01);
                 connection.claimInterface(usbInterface, true);
                 byte[] data = new byte[8];
                 connection.controlTransfer(0x21, 0x22, 0x03, 0x01, data, 0, lTIMEOUT);
