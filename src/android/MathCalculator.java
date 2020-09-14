@@ -252,10 +252,10 @@ public class MathCalculator extends CordovaPlugin {
         final String action = intent.getAction();
          if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(action)) 
          {
-              sendUsbState('Attach');
+              sendUsbState("Attach");
          }else if (UsbManager.ACTION_USB_DEVICE_DETACHED.equals(action)) 
          {
-              sendUsbState('Detach');
+              sendUsbState("Detach");
          }
     }
 
