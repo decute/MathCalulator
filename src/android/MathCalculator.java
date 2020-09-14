@@ -23,6 +23,8 @@ import android.content.IntentFilter;
 import org.apache.cordova.LOG;
 import java.util.*;
 
+import android.content.BroadcastReceiver;
+
 /**
  * This class echoes a string called from JavaScript.
  */
