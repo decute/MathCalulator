@@ -40,7 +40,7 @@ module.exports.getUsbDevice = function (success, error) {
 
 //This will give information about whether device is attached or detached
 module.exports.isUsbDeviceConnected = function (success, error) {
-    exec(success, error, 'UsbSetup', 'isUsbDeviceConnected', []);
+    exec(success, error, 'MathCalculator', 'isUsbDeviceConnected', []);
 };
 
 
