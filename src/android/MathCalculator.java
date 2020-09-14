@@ -184,33 +184,36 @@ public class MathCalculator extends CordovaPlugin {
         if(deviceFound==null){
             callbackContext.error("Please Open the USB Connection First");
         }else {
-           getPermission(deviceFound);
-           if(connection!=null){
-                usbInterface = deviceFound.getInterface(0x01);
-                connection.claimInterface(usbInterface, true);
-                byte[] data = new byte[8];
-                connection.controlTransfer(0x21, 0x22, 0x03, 0x01, data, 0, lTIMEOUT);
-                byte[] buffer = {0x00, (byte) 0xC2, 0x01, 0x00, 0x00, 0x00, 0x08};
-                connection.controlTransfer(0x21, 0x20, 0x00, 0x01, buffer, buffer.length, lTIMEOUT);
-                endpointRead  = usbInterface.getEndpoint(0x00);
-                endpointWrite = usbInterface.getEndpoint(0x01);
-                String command = "ISN?\r\n";
-                byte[] buf = command.getBytes(StandardCharsets.UTF_8);
-                int dataLength = buf.length;
-                int res = connection.bulkTransfer(endpointWrite,buf, dataLength, lTIMEOUT);
-                callbackContext.success("Bulk Transfer write, data_len:" + dataLength + "==" + res);
-                byte[] sn_data = new byte[64];
-                try {
-                   connection.bulkTransfer(endpointRead, sn_data, sn_data.length, lTIMEOUT);
-                }
-                catch (Exception e) {
-                callbackContext.error("Bulk Transfer Failed");
-                }
-           }else{
-               callbackContext.error("Please Open the USB Connection First");
+                getPermission(deviceFound);
+                try{
+                        connection = mUsbManager.openDevice(deviceFound);
+                        usbInterface = deviceFound.getInterface(0x01);
+                        connection.claimInterface(usbInterface, true);
+                        byte[] data = new byte[8];
+                        connection.controlTransfer(0x21, 0x22, 0x03, 0x01, data, 0, lTIMEOUT);
+                        byte[] buffer = {0x00, (byte) 0xC2, 0x01, 0x00, 0x00, 0x00, 0x08};
+                        connection.controlTransfer(0x21, 0x20, 0x00, 0x01, buffer, buffer.length, lTIMEOUT);
+                        endpointRead  = usbInterface.getEndpoint(0x00);
+                        endpointWrite = usbInterface.getEndpoint(0x01);
+                        String command = "ISN?\r\n";
+                        byte[] buf = command.getBytes(StandardCharsets.UTF_8);
+                        int dataLength = buf.length;
+                        int res = connection.bulkTransfer(endpointWrite,buf, dataLength, lTIMEOUT);
+                        callbackContext.success("Bulk Transfer DATA, data_len:" + dataLength + "==" + res);
+                        byte[] sn_data = new byte[64];
+                        try {
+                        connection.bulkTransfer(endpointRead, sn_data, sn_data.length, lTIMEOUT);
+                        }
+                        catch (Exception e) {
+                        callbackContext.error("Bulk Transfer Failed");
+                        }
+                          
+                   }catch (Exception e) {
+                        callbackContext.error("Failed to read" + e);
+                  }           
            }
-        }
     }
+    
 
     private void closeUsbConnection(CallbackContext callbackContext) {
          if(connection==null){
