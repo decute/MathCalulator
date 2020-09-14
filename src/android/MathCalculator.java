@@ -20,6 +20,8 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import org.apache.cordova.LOG;
+import java.util.*;
 
 /**
  * This class echoes a string called from JavaScript.
@@ -39,6 +41,12 @@ public class MathCalculator extends CordovaPlugin {
     private int targetVendorID= 1972;
     private int targetProductID = 144;
     int lTIMEOUT = 2000;
+
+     // Bluetooth state notification
+    CallbackContext stateCallback;
+    BroadcastReceiver stateReceiver;
+
+    private static final String TAG = "USBPlugin";
 
 
     @Override
@@ -69,6 +77,13 @@ public class MathCalculator extends CordovaPlugin {
         }else if(action.equals("getUsbDevice")) {
             this.getUsbDevice(callbackContext);
             return true;
+        }else if (action.equals("isUsbDeviceConnected")) {
+            if (this.stateCallback != null) {
+                callbackContext.error("State callback already registered.");
+            } else {
+                this.stateCallback = callbackContext;
+                addStateListener();
+            }
         }
         return false;
     }
@@ -212,6 +227,67 @@ public class MathCalculator extends CordovaPlugin {
          if (!mUsbManager.hasPermission(device)) {
              mUsbManager.requestPermission(device, PendingIntent.getActivity(cordova.getActivity(), 0, new Intent("android.permission.MANAGE_USB"), 0)) ;
            }
+    }
+
+    private void addStateListener() {
+         if (this.stateReceiver == null) {
+            this.stateReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    onUsbStateChange(intent);
+                }
+            };
+        }
+        try {
+            IntentFilter intentFilterAttach = new IntentFilter(UsbManager.ACTION_USB_DEVICE_ATTACHED);
+            IntentFilter intentFilterDetach = new IntentFilter(UsbManager.ACTION_USB_DEVICE_ATTACHED);
+            webView.getContext().registerReceiver(this.stateReceiver, intentFilterAttach);
+            webView.getContext().registerReceiver(this.stateReceiver, intentFilterDetach);
+        } catch (Exception e) {
+            //LOG.e(TAG, "Error registering state receiver: " + e.getMessage(), e);
+        }
+    }
+
+    private void onUsbStateChange(Intent intent) {
+        final String action = intent.getAction();
+         if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(action)) 
+         {
+              sendUsbState('Attach');
+         }else if (UsbManager.ACTION_USB_DEVICE_DETACHED.equals(action)) 
+         {
+              sendUsbState('Detach');
+         }
+    }
+
+    private void sendUsbState(String result){
+        if (this.stateCallback != null) {
+            this.stateCallback.success(result);
+        }
+    }
+
+    public void onDestroy() {
+        removeStateListener();
+    }
+
+    private void removeStateListener() {
+        if (this.stateReceiver != null) {
+            try {
+                webView.getContext().unregisterReceiver(this.stateReceiver);
+            } catch (Exception e) {
+                //LOG.e(TAG, "Error unregistering state receiver: " + e.getMessage(), e);
+            }
+        }
+        this.stateCallback = null;
+        this.stateReceiver = null;
+
+        if(connection!=null) {
+             connection.releaseInterface(usbInterface);
+             connection.close();
+             deviceFound = null;
+             usbInterface = null;
+             endpointRead = null;
+             endpointWrite =null;
+         }
     }
 
     private void add(JSONArray args, CallbackContext callbackContext) {
