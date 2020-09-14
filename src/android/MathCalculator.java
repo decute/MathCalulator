@@ -34,11 +34,11 @@ public class MathCalculator extends CordovaPlugin {
     HashMap<String, UsbDevice> connectedDevices = null;
      /* USB system service */
     private UsbManager mUsbManager;
-    private UsbDevice deviceFound;
+    private UsbDevice deviceFound = null;
     private UsbDeviceConnection connection;
-    private UsbInterface usbInterface;
-    private UsbEndpoint endpointRead;
-    private UsbEndpoint endpointWrite;
+    private UsbInterface usbInterface = null;
+    private UsbEndpoint endpointRead = null;
+    private UsbEndpoint endpointWrite = null;
 
     private int targetVendorID= 1972;
     private int targetProductID = 144;
