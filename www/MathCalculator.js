@@ -34,6 +34,11 @@ module.exports.sendCommand = function (arg0, success, error) {
     exec(success, error, 'MathCalculator', 'sendCommand', [arg0]);
 };
 
+//with the help of productId and VendorID , send Remote command
+module.exports.sendCommandAndWaitResponse = function (arg0, success, error) {
+    exec(success, error, 'MathCalculator', 'sendCommandAndWaitResponse', [arg0]);
+};
+
 module.exports.getUsbDevice = function (success, error) {
     exec(success, error, 'MathCalculator', 'getUsbDevice', []);
 };
