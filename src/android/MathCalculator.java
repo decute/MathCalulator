@@ -31,14 +31,14 @@ import android.content.BroadcastReceiver;
 public class MathCalculator extends CordovaPlugin {
 
     
-    HashMap<String, UsbDevice> connectedDevices = null;
+    HashMap<String, UsbDevice> connectedDevices;
      /* USB system service */
     private UsbManager mUsbManager;
-    private UsbDevice deviceFound = null;
+    private UsbDevice deviceFound;
     private UsbDeviceConnection connection;
-    private UsbInterface usbInterface = null;
-    private UsbEndpoint endpointRead = null;
-    private UsbEndpoint endpointWrite = null;
+    private UsbInterface usbInterface;
+    private UsbEndpoint endpointRead;
+    private UsbEndpoint endpointWrite;
 
     private int targetVendorID= 1972;
     private int targetProductID = 144;
