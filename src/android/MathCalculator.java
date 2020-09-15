@@ -76,7 +76,7 @@ public class MathCalculator extends CordovaPlugin {
             String command = args.getString(0);
             this.sendCommand(command,callbackContext);
             return true;
-        }else if(action.equals("sendCommand")) {
+        }else if(action.equals("sendCommandAndWaitResponse")) {
             String command = args.getString(0);
             this.sendCommandAndWaitResponse(command,callbackContext);
             return true;
