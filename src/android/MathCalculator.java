@@ -335,15 +335,6 @@ public class MathCalculator extends CordovaPlugin {
         }
         this.stateCallback = null;
         this.stateReceiver = null;
-
-        if(connection!=null) {
-             connection.releaseInterface(usbInterface);
-             connection.close();
-             deviceFound = null;
-             usbInterface = null;
-             endpointRead = null;
-             endpointWrite =null;
-         }
     }
 
     private void add(JSONArray args, CallbackContext callbackContext) {
