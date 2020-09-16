@@ -184,7 +184,7 @@ public class MathCalculator extends CordovaPlugin {
                     connection.controlTransfer(33, 34, 3, 0, null, 0, lTIMEOUT);
                     callbackContext.success("Connection Established Successfully");   
                 }catch (Exception e) {
-                    callbackContext.error("Failed to Established the Connection");
+                    callbackContext.error("Failed to Established the Connection"+e);
                 } 
            }else{
                     callbackContext.error("No Device Found of PID AND VID Tyep"+ targetProductID + "----"+ targetVendorID );
