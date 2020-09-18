@@ -113,7 +113,7 @@ public class MathCalculator extends CordovaPlugin {
                 callbackContext.error("State callback already registered.");
             } else {
                 this.stateTimerCallback = callbackContext;
-                testFunction();
+                testFunction(this.stateTimerCallback);
             }
         }else if(action.equals("testThreadFunction")) {
             this.testThreadFunction(callbackContext);
@@ -426,16 +426,17 @@ public class MathCalculator extends CordovaPlugin {
 		});
 	}
 
-    private void testFunction() {
+    private void testFunction(CallbackContext callbackContext) {
+        this.stateTimerCallback = callbackContext;
         timer = new Timer();
         task = new TimerTask() {
          public int i = 0;
          @Override
             public void run() {
-                if(this.stateTimerCallback != null){
-                     this.stateTimerCallback.success("Timer ran " + ++i);
+                if(stateTimerCallback != null){
+                     stateTimerCallback.success("Timer ran " + ++i);
                 }else{
-                     this.stateTimerCallback.success("Timer Error " + this.stateTimerCallback);
+                     stateTimerCallback.success("Timer Error " + stateTimerCallback);
                 }          
             }
         };
