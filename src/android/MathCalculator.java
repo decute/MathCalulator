@@ -310,20 +310,16 @@ public class MathCalculator extends CordovaPlugin {
            getPermission(deviceFound);
            if(connection!=null){
                 String command = (args==null) ? "ISN?\r\n" : args;
-                //byte[] buf = command.getBytes(StandardCharsets.UTF_8);
-                byte[] buf = command.getBytes();
+                byte[] buf = command.getBytes(StandardCharsets.UTF_8);
                 int dataLength = buf.length;
                 int res = connection.bulkTransfer(endpointWrite,buf, dataLength, lTIMEOUT);
                 byte[] sn_data = new byte[64];
-                try {
-                   connection.bulkTransfer(endpointRead, sn_data, sn_data.length, lTIMEOUT);
+                int r = connection.bulkTransfer(endpointRead, sn_data, sn_data.length, lTIMEOUT);
+                if (r >= 0) {
+                     callbackContext.success("DATA for command : " + command + "Data_Length : " + dataLength + "Response :" + new String(sn_data, StandardCharsets.UTF_8));
+                }else{
+                    callbackContext.error("Bulk Transfer read Failed"+ r + "write: "+ res);
                 }
-                catch (Exception e) {
-                  callbackContext.error("Bulk Transfer READ Failed" + e);
-                }
-                //String result = new String(sn_data, StandardCharsets.UTF_8);
-                String result = new String(sn_data);
-                callbackContext.success("DATA for command : " + command + "Data_Length : " + dataLength + "Response :" + result);
            }else{
                callbackContext.error("Please Open the USB Connection First"+ connection);
            }
