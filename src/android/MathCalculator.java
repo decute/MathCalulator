@@ -426,23 +426,26 @@ public class MathCalculator extends CordovaPlugin {
 	}
 
      public void testFunction(final CallbackContext callbackContext) {
-        final MathCalculator that = this;
-        cordova.getThreadPool().execute(new Runnable() {   
-           public void run() {
-                  that.timer = new Timer(LOG_TAG, true);
-                  TimerTask timerTask = new TimerTask() {
-                        public void run() {
-                            double db = 0;                                
-                            db = 20.0 * value + 90;
-                            ++value;              
-                            PluginResult result = new PluginResult(PluginResult.Status.OK, (float) db);
-                            result.setKeepCallback(true);
-                            callbackContext.sendPluginResult(result);
-                        }
-                    };
-                 that.timer.scheduleAtFixedRate(timerTask, 0, 1000);
-              }
-            });            
+        // final MathCalculator that = this;
+        // cordova.getThreadPool().execute(new Runnable() {   
+        //    public void run() {
+        //           that.timer = new Timer(LOG_TAG, true);
+        //           TimerTask timerTask = new TimerTask() {
+        //                 public void run() {
+        //                     double db = 0;                                
+        //                     db = 20.0 * value + 90;
+        //                     ++value;              
+        //                     PluginResult result = new PluginResult(PluginResult.Status.OK, (float) db);
+        //                     result.setKeepCallback(true);
+        //                     callbackContext.sendPluginResult(result);
+        //                 }
+        //             };
+        //          that.timer.scheduleAtFixedRate(timerTask, 0, 1000);
+        //       }
+        //     }); 
+         double db = 10;     
+         PluginResult result = new PluginResult(PluginResult.Status.OK, (float) db);
+         callbackContext.sendPluginResult(result);        
         }
 
 
