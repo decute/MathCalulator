@@ -106,6 +106,7 @@ public class MathCalculator extends CordovaPlugin {
                 this.stateCallback = callbackContext;
                 addStateListener();
             }
+            return true;
         }else if(action.equals("openAscanUsbConnection")) {
             this.openAscanUsbConnection(callbackContext);
             return true;
