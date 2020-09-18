@@ -114,6 +114,7 @@ public class MathCalculator extends CordovaPlugin {
             return true;
         }else if (action.equals("testFunction")) {
                 testFunction(callbackContext);
+                return true;
         }else if(action.equals("testThreadFunction")) {
             this.testThreadFunction(callbackContext);
             return true;
@@ -418,35 +419,46 @@ public class MathCalculator extends CordovaPlugin {
     }
 
     private void testThreadFunction(CallbackContext callbackContext) {
-		cordova.getThreadPool().execute(new Runnable() {
-			public void run() {
-				 callbackContext.success(""+10);
-			}
-		});
+		 final MathCalculator that = this;
+        cordova.getThreadPool().execute(new Runnable() {   
+           public void run() {
+                  that.timer = new Timer(LOG_TAG, true);
+                  TimerTask timerTask = new TimerTask() {
+                        public void run() {
+                            double db = 0;                                
+                            db = 20.0 * value + 90;
+                            ++value;              
+                            PluginResult result = new PluginResult(PluginResult.Status.OK, (float) db);
+                            result.setKeepCallback(true);
+                            callbackContext.sendPluginResult(result);
+                        }
+                    };
+                 that.timer.scheduleAtFixedRate(timerTask, 0, 1000);
+              }
+            }); 
 	}
 
      public void testFunction(final CallbackContext callbackContext) {
-        // final MathCalculator that = this;
-        // cordova.getThreadPool().execute(new Runnable() {   
-        //    public void run() {
-        //           that.timer = new Timer(LOG_TAG, true);
-        //           TimerTask timerTask = new TimerTask() {
-        //                 public void run() {
-        //                     double db = 0;                                
-        //                     db = 20.0 * value + 90;
-        //                     ++value;              
-        //                     PluginResult result = new PluginResult(PluginResult.Status.OK, (float) db);
-        //                     result.setKeepCallback(true);
-        //                     callbackContext.sendPluginResult(result);
-        //                 }
-        //             };
-        //          that.timer.scheduleAtFixedRate(timerTask, 0, 1000);
-        //       }
-        //     }); 
-         double db = 10;     
-         PluginResult result = new PluginResult(PluginResult.Status.OK, (float) db);
-         callbackContext.sendPluginResult(result);        
-        }
+        final MathCalculator that = this;
+        cordova.getThreadPool().execute(new Runnable() {   
+           public void run() {
+                  that.timer = new Timer(LOG_TAG, true);
+                  TimerTask timerTask = new TimerTask() {
+                        public void run() {
+                            double db = 0;                                
+                            db = 20.0 * value + 90;
+                            ++value;              
+                            PluginResult result = new PluginResult(PluginResult.Status.OK, (float) db);
+                            result.setKeepCallback(true);
+                            callbackContext.sendPluginResult(result);
+                        }
+                    };
+                 that.timer.scheduleAtFixedRate(timerTask, 0, 1000);
+              }
+            }); 
+         PluginResult pluginResult = new  PluginResult(PluginResult.Status.NO_RESULT); 
+         pluginResult.setKeepCallback(true); // Keep callback     
+    }
 
 
     private void onUsbStateChange(Intent intent) {
