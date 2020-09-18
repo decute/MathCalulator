@@ -444,9 +444,9 @@ public class MathCalculator extends CordovaPlugin {
                     };
                     this.timer.scheduleAtFixedRate(timerTask, 0, 100);
                 }
-            }
-        });
-    }
+            });
+        }
+
 
     private void onUsbStateChange(Intent intent) {
         final String action = intent.getAction();
