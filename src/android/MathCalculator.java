@@ -115,7 +115,6 @@ public class MathCalculator extends CordovaPlugin {
             return true;
         }else if (action.equals("testFunction")) {
                 testFunction(callbackContext);
-            }
         }else if(action.equals("testThreadFunction")) {
             this.testThreadFunction(callbackContext);
             return true;
