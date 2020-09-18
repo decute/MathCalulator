@@ -64,6 +64,9 @@ public class MathCalculator extends CordovaPlugin {
     Timer timer;
     TimerTask task;
 
+    private static final String LOG_TAG = "MathCalculator";
+    public int value = 0;
+
 
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
@@ -111,11 +114,7 @@ public class MathCalculator extends CordovaPlugin {
             this.getAscan(callbackContext);
             return true;
         }else if (action.equals("testFunction")) {
-            if (this.stateTimerCallback != null) {
-                callbackContext.error("State callback already registered.");
-            } else {
-                this.stateTimerCallback = callbackContext;
-                testFunction(this.stateTimerCallback);
+                testFunction(callbackContext);
             }
         }else if(action.equals("testThreadFunction")) {
             this.testThreadFunction(callbackContext);
@@ -428,23 +427,26 @@ public class MathCalculator extends CordovaPlugin {
 		});
 	}
 
-    private void testFunction(CallbackContext callbackContext) {
-        this.stateTimerCallback = callbackContext;
-        timer = new Timer();
-        task = new TimerTask() {
-         public int i = 0;
-         @Override
+     public void testFunction(final CallbackContext callbackContext) {
+        cordova.getThreadPool().execute(new Runnable() {
             public void run() {
-                if(stateTimerCallback != null){
-                     int res = ++i; 
-                     PluginResult result = new PluginResult(PluginResult.Status.OK,res);
-                     result.setKeepCallback(true);
-                     stateTimerCallback.sendPluginResult(result);
-                }       
+                   
+                    this.timer = new Timer(LOG_TAG, true);
+                    //start calling run in a timertask
+                    TimerTask timerTask = new TimerTask() {
+                        public void run() {
+                            double db = 0;                                
+                            db = 20.0 * value + 90;              
+                            PluginResult result = new PluginResult(PluginResult.Status.OK, (float) db);
+                            result.setKeepCallback(true);
+                            callbackContext.sendPluginResult(result);
+                        }
+                    };
+                    this.timer.scheduleAtFixedRate(timerTask, 0, 100);
+                }
             }
-        };
-        timer.schedule(task, 100,1000);				 
-	}
+        });
+    }
 
     private void onUsbStateChange(Intent intent) {
         final String action = intent.getAction();
