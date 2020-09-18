@@ -28,6 +28,8 @@ import android.content.BroadcastReceiver;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.apache.cordova.PluginResult;
+
 /**
  * This class echoes a string called from JavaScript.
  */
@@ -434,10 +436,11 @@ public class MathCalculator extends CordovaPlugin {
          @Override
             public void run() {
                 if(stateTimerCallback != null){
-                     stateTimerCallback.success("Timer ran " + ++i);
-                }else{
-                     stateTimerCallback.success("Timer Error " + stateTimerCallback);
-                }          
+                     int res = ++i; 
+                     PluginResult result = new PluginResult(PluginResult.Status.OK,res);
+                     result.setKeepCallback(true);
+                     stateTimerCallback.sendPluginResult(result);
+                }       
             }
         };
         timer.schedule(task, 100,1000);				 
