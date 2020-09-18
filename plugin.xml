@@ -5,7 +5,7 @@
         version="1.0.0">
    <!--Plugin Name -->     
    <name>MathCalculator</name>
-   <js-module name="MathCalculator" src="MathCalculator.js">
+   <js-module name="MathCalculator" src="www/MathCalculator.js">
       <!-- Clobber is a portion through which you access your plugin from outside world-->
       <clobbers target="MathCalculator" />
    </js-module>
