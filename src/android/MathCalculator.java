@@ -427,23 +427,29 @@ public class MathCalculator extends CordovaPlugin {
 	}
 
      public void testFunction(final CallbackContext callbackContext) {
-        cordova.getThreadPool().execute(new Runnable() {
-            public void run() {
+        // cordova.getThreadPool().execute(new Runnable() {
+        //     public void run() {
                    
-                    timer = new Timer(LOG_TAG, true);
-                    //start calling run in a timertask
-                    TimerTask timerTask = new TimerTask() {
-                        public void run() {
-                            double db = 0;                                
-                            db = 20.0 * value + 90;              
-                            PluginResult result = new PluginResult(PluginResult.Status.OK, (float) db);
-                            result.setKeepCallback(true);
-                            callbackContext.sendPluginResult(result);
-                        }
-                    };
-                    timer.scheduleAtFixedRate(timerTask, 0, 100);
-                }
-            });
+        //             timer = new Timer(LOG_TAG, true);
+        //             //start calling run in a timertask
+        //             TimerTask timerTask = new TimerTask() {
+        //                 public void run() {
+        //                     double db = 0;                                
+        //                     db = 20.0 * value + 90;              
+        //                     PluginResult result = new PluginResult(PluginResult.Status.OK, (float) db);
+        //                     result.setKeepCallback(true);
+        //                     callbackContext.sendPluginResult(result);
+        //                 }
+        //             };
+        //             timer.scheduleAtFixedRate(timerTask, 0, 100);
+        //         }
+        //     });
+         double db = 0;                                
+         db = 20.0 * value + 90;              
+         PluginResult result = new PluginResult(PluginResult.Status.OK, (float) db);
+         ++value;
+         result.setKeepCallback(true);
+         callbackContext.sendPluginResult(result);
         }
 
 
