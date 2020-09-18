@@ -1,4 +1,4 @@
-var DBMeter = {
+var MathCalculator = {
 
     coolMethod: function (arg0, success, error) {
         cordova.exec(
