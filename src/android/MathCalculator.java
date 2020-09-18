@@ -430,7 +430,7 @@ public class MathCalculator extends CordovaPlugin {
         cordova.getThreadPool().execute(new Runnable() {
                     timer = new Timer(LOG_TAG, true);
                     //start calling run in a timertask
-                    TimerTask timerTask = new TimerTask() {
+                    task = new TimerTask() {
                         public void run() {
                             double db = 0;                                
                             db = 20.0 * value + 90;              
@@ -439,7 +439,7 @@ public class MathCalculator extends CordovaPlugin {
                             callbackContext.sendPluginResult(result);
                         }
                     };              
-                 timer.scheduleAtFixedRate(timerTask, 0, 1000);
+                 timer.scheduleAtFixedRate(task, 0, 1000);
             });
         //  double db = 0;                                
         //  db = 20.0 * value + 90;              
