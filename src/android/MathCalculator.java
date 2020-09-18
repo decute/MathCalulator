@@ -53,8 +53,7 @@ public class MathCalculator extends CordovaPlugin {
     int lTIMEOUT = 5000;
 
      // Bluetooth state notification
-    CallbackContext stateCallback;
-    CallbackContext stateTimerCallback;
+    CallbackContext stateCallback, stateTimerCallback;
     BroadcastReceiver stateReceiver;
 
     private static final String TAG = "USBPlugin";
@@ -222,7 +221,7 @@ public class MathCalculator extends CordovaPlugin {
     }
 
     private void openAscanUsbConnection(CallbackContext callbackContext) {
-        mUsbManager = (UsbManager) this.getSystemService(UsbManager.class);
+        mUsbManager = (UsbManager) cordova.getActivity().getSystemService(UsbManager.class);
         connectedDevices = mUsbManager.getDeviceList();
         if (connectedDevices.isEmpty()) {
             callbackContext.success("No Devices Currently Connected");
@@ -433,7 +432,7 @@ public class MathCalculator extends CordovaPlugin {
          public int i = 0;
          @Override
             public void run() {
-                if(this.stateTimerCallback!=null){
+                if(this.stateTimerCallback != null){
                      this.stateTimerCallback.success("Timer ran " + ++i);
                 }else{
                      this.stateTimerCallback.success("Timer Error " + this.stateTimerCallback);
