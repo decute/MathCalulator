@@ -92,10 +92,6 @@ public class MathCalculator extends CordovaPlugin {
             String command = args.getString(0);
             this.sendCommand(command,callbackContext);
             return true;
-        }else if(action.equals("sendCommandAndWaitResponse")) {
-            String command = args.getString(0);
-            this.sendCommandAndWaitResponse(command,callbackContext);
-            return true;
         }else if(action.equals("getUsbDevice")) {
             this.getUsbDevice(callbackContext);
             return true;
@@ -113,12 +109,9 @@ public class MathCalculator extends CordovaPlugin {
         }else if(action.equals("getAscan")) {
             this.getAscan(callbackContext);
             return true;
-        }else if (action.equals("testFunction")) {
-                testFunction(callbackContext);
+        }else if (action.equals("getContiniousAscan")) {
+                getContiniousAscan(callbackContext);
                 return true;
-        }else if(action.equals("testThreadFunction")) {
-            this.testThreadFunction(callbackContext);
-            return true;
         }
         return false;
     }
@@ -254,54 +247,7 @@ public class MathCalculator extends CordovaPlugin {
         }
     }
 
-    private void sendCommandAndWaitResponse(String args, CallbackContext callbackContext) {
-            mUsbManager = (UsbManager) cordova.getActivity().getSystemService(UsbManager.class);
-            connectedDevices = mUsbManager.getDeviceList();
-            if (connectedDevices.isEmpty()) {
-                callbackContext.success("No Devices Currently Connected");
-            }else{
-            Iterator<UsbDevice> deviceIterator = connectedDevices.values().iterator();
-            while (deviceIterator.hasNext()) {
-                UsbDevice device = deviceIterator.next();
-                if(device.getVendorId()==targetVendorID){
-                if(device.getProductId()==targetProductID){
-                        deviceFound = device;
-                   }
-               }           
-           }
-           if(deviceFound != null){
-                getPermission(deviceFound); 
-                try{
-                    connection = mUsbManager.openDevice(deviceFound);
-                    usbInterface = deviceFound.getInterface(0x01);
-                    connection.claimInterface(usbInterface, true);
-                    endpointRead  = usbInterface.getEndpoint(0x00);
-                    endpointWrite = usbInterface.getEndpoint(0x01);
-                    byte[] buffer = {0, -61, 1, 0, 0, 0, 8};
-                    connection.controlTransfer(33, 32, 0, 0, buffer, buffer.length, lTIMEOUT);
-                    connection.controlTransfer(33, 34, 1, 0, null, 0, lTIMEOUT);
-                    connection.controlTransfer(33, 34, 3, 0, null, 0, lTIMEOUT);
-                    String command = (args==null) ? "ISN?\r\n" : args;
-                    byte[] buf = command.getBytes(StandardCharsets.UTF_8);
-                    int dataLength = buf.length;
-                    int res = connection.bulkTransfer(endpointWrite,buf, dataLength, lTIMEOUT);
-                    byte[] sn_data = new byte[64];
-                    try {
-                    connection.bulkTransfer(endpointRead, sn_data, sn_data.length, lTIMEOUT);
-                    }
-                    catch (Exception e) {
-                    callbackContext.error("Bulk Transfer READ Failed" + e);
-                    }
-                    String result = new String(sn_data, StandardCharsets.UTF_8);
-                    callbackContext.success("DATA is, Data_Length:" + dataLength + "==" + result);   
-                }catch (Exception e) {
-                    callbackContext.error("Failed to Established the Connection" + e);
-                } 
-           }else{
-                    callbackContext.error("No Device Found of PID AND VID Tyep"+ targetProductID + "----"+ targetVendorID );
-           }      
-         }
-    }
+   
 
     private void sendCommand(String args, CallbackContext callbackContext) {  
         if(deviceFound==null){
@@ -419,42 +365,57 @@ public class MathCalculator extends CordovaPlugin {
         }
     }
 
-    private void testThreadFunction(CallbackContext callbackContext) {
-		 final MathCalculator that = this;
-        cordova.getThreadPool().execute(new Runnable() {   
-           public void run() {
-                  that.timer = new Timer(LOG_TAG, true);
-                  TimerTask timerTask = new TimerTask() {
-                        public void run() {
-                            double db = 0;                                
-                            db = 20.0 * value + 90;
-                            ++value;              
-                            PluginResult result = new PluginResult(PluginResult.Status.OK, (float) db);
-                            result.setKeepCallback(true);
-                            callbackContext.sendPluginResult(result);
-                        }
-                    };
-                 that.timer.scheduleAtFixedRate(timerTask, 0, 1000);
-              }
-            }); 
-	}
-
-     public void testFunction(final CallbackContext callbackContext) {
+    
+     public void getContiniousAscan(final CallbackContext callbackContext) {
         final MathCalculator that = this;
         cordova.getThreadPool().execute(new Runnable() {   
            public void run() {
+               if(deviceFound==null){
+                     callbackContext.error("Device Referenced not Found ... Please open the connection First" + deviceFound);
+               }else {
                   that.timer = new Timer(LOG_TAG, true);
                   TimerTask timerTask = new TimerTask() {
-                        public void run() {
-                            double db = 0;                                
-                            db = 20.0 * value + 90;
-                            ++value;              
-                            PluginResult result = new PluginResult(PluginResult.Status.OK, (float) db);
+                    public void run() {
+                     getPermission(deviceFound);
+                    if (connection != null) {
+                        int dataSize = endPointAscanRead.getMaxPacketSize();
+                        byte[] data = new byte[dataSize];
+
+                        //do the first read
+                        int rval = connection.controlTransfer(0xC1, 0xFD, 0x00, 0x00, null, 0, lTIMEOUT);
+                        rval = connection.bulkTransfer(endPointAscanRead, data, dataSize, lTIMEOUT);
+                        int ascanSize = (data[3] << 24) | (data[2] << 16) | (data[1] << 8) | data[0];
+                        ascanSize *= 4;
+                        byte[] ascanData = new byte[ascanSize];
+                        for (int i = 0; i < (dataSize - 4); i++) {
+                            ascanData[i] = data[4 + i];
+                        }
+
+                       while (ascanData.length < ascanSize) {
+                            rval = connection.controlTransfer(0xC1, 0xFE, 0x00, 0x00, null, 0, lTIMEOUT);
+                            assert (rval >= 0);
+                            rval = connection.bulkTransfer(endPointAscanRead, data, dataSize, lTIMEOUT);
+                            assert (rval == dataSize);
+
+                            int x = ascanData.length;
+                            if ((x + dataSize) > ascanSize) {
+                                dataSize -= ((x + dataSize) - ascanSize);
+                            }
+
+                            for (int i = 0; i < dataSize; i++) {
+                                ascanData[x + i] = data[i];
+                            }
+                            }           
+                            PluginResult result = new PluginResult(PluginResult.Status.OK, bytesToHex(ascanData));
                             result.setKeepCallback(true);
                             callbackContext.sendPluginResult(result);
+                            } else {
+                                callbackContext.error("Please Open the USB Connection First");
+                            }                        
                         }
                     };
-                 that.timer.scheduleAtFixedRate(timerTask, 0, 1000);
+                  that.timer.scheduleAtFixedRate(timerTask, 0, 100);
+               }  
               }
             }); 
          PluginResult pluginResult = new  PluginResult(PluginResult.Status.NO_RESULT); 

@@ -26,9 +26,6 @@ var MathCalculator = {
     sendCommand : function (arg0, success, error) {
         cordova.exec(success, error, 'MathCalculator', 'sendCommand', [arg0]);
     },
-    sendCommandAndWaitResponse : function (arg0, success, error) {
-        cordova.exec(success, error, 'MathCalculator', 'sendCommandAndWaitResponse', [arg0]);
-    },
     getUsbDevice : function (success, error) {
         cordova.exec(success, error, 'MathCalculator', 'getUsbDevice', []);
     },
@@ -41,11 +38,8 @@ var MathCalculator = {
     getAscan : function (success, error) {
         cordova.exec(success, error, 'MathCalculator', 'getAscan', []);
     },
-    testFunction : function (success, error) {
-        cordova.exec(success, error, 'MathCalculator', 'testFunction', []);
-    },
-    testThreadFunction : function (success, error) {
-        cordova.exec(success, error, 'MathCalculator', 'testThreadFunction', []);
+    getContiniousAscan : function (success, error) {
+        cordova.exec(success, error, 'MathCalculator', 'getContiniousAscan', []);
     }
   };
 
