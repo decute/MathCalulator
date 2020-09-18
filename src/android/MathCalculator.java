@@ -25,6 +25,9 @@ import java.util.*;
 
 import android.content.BroadcastReceiver;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 /**
  * This class echoes a string called from JavaScript.
  */
@@ -36,9 +39,14 @@ public class MathCalculator extends CordovaPlugin {
     private UsbManager mUsbManager;
     private UsbDevice deviceFound;
     private UsbDeviceConnection connection;
+
     private UsbInterface usbInterface;
     private UsbEndpoint endpointRead;
     private UsbEndpoint endpointWrite;
+
+    private UsbInterface usbAscanInterface;
+    private UsbEndpoint endPointAscanRead;
+    private UsbEndpoint endPointAscanWrite;
 
     private int targetVendorID= 1972;
     private int targetProductID = 144;
@@ -46,9 +54,14 @@ public class MathCalculator extends CordovaPlugin {
 
      // Bluetooth state notification
     CallbackContext stateCallback;
+    CallbackContext stateTimerCallback;
     BroadcastReceiver stateReceiver;
 
     private static final String TAG = "USBPlugin";
+    private static final byte[] HEX_ARRAY = "0123456789ABCDEF".getBytes(StandardCharsets.UTF_8);
+
+    Timer timer;
+    TimerTask task;
 
 
     @Override
@@ -90,6 +103,22 @@ public class MathCalculator extends CordovaPlugin {
                 this.stateCallback = callbackContext;
                 addStateListener();
             }
+        }else if(action.equals("openAscanUsbConnection")) {
+            this.openAscanUsbConnection(callbackContext);
+            return true;
+        }else if(action.equals("getAscan")) {
+            this.getAscan(callbackContext);
+            return true;
+        }else if (action.equals("testFunction")) {
+            if (this.stateTimerCallback != null) {
+                callbackContext.error("State callback already registered.");
+            } else {
+                this.stateTimerCallback = callbackContext;
+                testFunction();
+            }
+        }else if(action.equals("testThreadFunction")) {
+            this.testThreadFunction(callbackContext);
+            return true;
         }
         return false;
     }
@@ -192,6 +221,39 @@ public class MathCalculator extends CordovaPlugin {
          }
     }
 
+    private void openAscanUsbConnection(CallbackContext callbackContext) {
+        mUsbManager = (UsbManager) this.getSystemService(UsbManager.class);
+        connectedDevices = mUsbManager.getDeviceList();
+        if (connectedDevices.isEmpty()) {
+            callbackContext.success("No Devices Currently Connected");
+        }else{
+            Iterator<UsbDevice> deviceIterator = connectedDevices.values().iterator();
+            while (deviceIterator.hasNext()) {
+                UsbDevice device = deviceIterator.next();
+                if(device.getVendorId()==targetVendorID){
+                    if(device.getProductId()==targetProductID){
+                        deviceFound = device;
+                    }
+                }
+            }
+            if(deviceFound != null){
+                getPermission(deviceFound);
+                try{
+                    connection = mUsbManager.openDevice(deviceFound);
+                    usbAscanInterface = deviceFound.getInterface(0x02);
+                    connection.claimInterface(usbAscanInterface, true);
+                    endPointAscanRead  = usbAscanInterface.getEndpoint(0x00);
+                    endPointAscanWrite = usbAscanInterface.getEndpoint(0x01);
+                    callbackContext.success("Connection Established Successfully");
+                }catch (Exception e) {
+                    callbackContext.error("Failed to Established the Connection");
+                }
+            }else{
+                callbackContext.error("No Device Found of PID AND VID Tyep"+ targetProductID + "----"+ targetVendorID );
+            }
+        }
+    }
+
     private void sendCommandAndWaitResponse(String args, CallbackContext callbackContext) {
             mUsbManager = (UsbManager) cordova.getActivity().getSystemService(UsbManager.class);
             connectedDevices = mUsbManager.getDeviceList();
@@ -287,6 +349,61 @@ public class MathCalculator extends CordovaPlugin {
            }
     }
 
+    private static String bytesToHex(byte[] bytes) {
+        byte[] hexChars = new byte[(bytes.length/2) * 7];
+        for (int j = 0; j < (bytes.length/2); j+=2) {
+            int v1 = bytes[j] & 0xFF;
+            int v2 = bytes[j+1] & 0xFF;
+
+            hexChars[j*7 + 0] = '(';
+            hexChars[j*7 + 1] = HEX_ARRAY[v1 >>> 4];
+            hexChars[j*7 + 2] = HEX_ARRAY[v1 & 0x0F];
+            hexChars[j*7 + 3] = ',';
+            hexChars[j*7 + 4] = HEX_ARRAY[v2 >>> 4];
+            hexChars[j*7 + 5] = HEX_ARRAY[v2 & 0x0F];
+            hexChars[j*7 + 6] = ')';
+        }
+        return new String(hexChars, StandardCharsets.UTF_8);
+    }
+
+    private void getAscan(CallbackContext callbackContext){
+        if(deviceFound==null){
+            callbackContext.success("Device Referenced not Found ... Please open the connection First" + deviceFound);
+        }else {
+            getPermission(deviceFound);
+            if(connection!=null){
+                int dataSize = endPointAscanRead.getMaxPacketSize();
+                byte[] data = new byte[dataSize];
+
+                //do the first read
+                int rval = connection.controlTransfer(0xC1, 0xFD, 0x00, 0x00, null, 0, lTIMEOUT);
+                rval =  connection.bulkTransfer(endPointAscanRead, data, dataSize, lTIMEOUT);
+                int ascanSize = (data[3] << 24) | (data[2] << 16) | (data[1] << 8) | data[0];
+                ascanSize *= 4;
+                byte[] ascanData = new byte[ascanSize];
+                for(int i=0; i<(dataSize-4); i++) {
+                    ascanData[i] = data[4+i];
+                }
+                while (ascanData.length < ascanSize) {
+                    rval = connection.controlTransfer(0xC1, 0xFE, 0x00, 0x00, null, 0, lTIMEOUT); assert(rval>=0);
+                    rval = connection.bulkTransfer(endPointAscanRead, data, dataSize, lTIMEOUT); assert(rval==dataSize);
+
+                    int x = ascanData.length;
+                    if ((x+dataSize)>ascanSize) {
+                        dataSize -= ((x+dataSize) - ascanSize);
+                    }
+
+                    for(int i=0; i<dataSize; i++) {
+                        ascanData[x+i] = data[i];
+                    }
+                }
+                 callbackContext.success(bytesToHex(ascanData));
+            }else{
+                callbackContext.error("Please Open the USB Connection First");
+            }
+        }
+    }
+
     private void addStateListener() {
          if (this.stateReceiver == null) {
             this.stateReceiver = new BroadcastReceiver() {
@@ -305,6 +422,30 @@ public class MathCalculator extends CordovaPlugin {
             //LOG.e(TAG, "Error registering state receiver: " + e.getMessage(), e);
         }
     }
+
+    private void testThreadFunction(CallbackContext callbackContext) {
+		cordova.getThreadPool().execute(new Runnable() {
+			public void run() {
+				 callbackContext.success(""+10);
+			}
+		});
+	}
+
+    private void testFunction() {
+        timer = new Timer();
+        task = new TimerTask() {
+         public int i = 0;
+         @Override
+            public void run() {
+                if(this.stateTimerCallback!=null){
+                     this.stateTimerCallback.success("Timer ran " + ++i);
+                }else{
+                     this.stateTimerCallback.success("Timer Error " + this.stateTimerCallback);
+                }          
+            }
+        };
+        timer.schedule(task, 100,1000);				 
+	}
 
     private void onUsbStateChange(Intent intent) {
         final String action = intent.getAction();
