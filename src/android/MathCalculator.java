@@ -61,9 +61,8 @@ public class MathCalculator extends CordovaPlugin {
     private static final String TAG = "USBPlugin";
     private static final byte[] HEX_ARRAY = "0123456789ABCDEF".getBytes(StandardCharsets.UTF_8);
 
-    Timer timer;
-    TimerTask task;
-
+    private Timer timer;
+  
     private static final String LOG_TAG = "MathCalculator";
     public int value = 0;
 
@@ -427,10 +426,11 @@ public class MathCalculator extends CordovaPlugin {
 	}
 
      public void testFunction(final CallbackContext callbackContext) {
+        final MathCalculator that = this;
         cordova.getThreadPool().execute(new Runnable() {   
            public void run() {
-                  timer = new Timer(LOG_TAG, true);
-                  task = new TimerTask() {
+                  that.time = new Timer(LOG_TAG, true);
+                  TimerTask timerTask = new TimerTask() {
                         public void run() {
                             double db = 0;                                
                             db = 20.0 * value + 90;
@@ -440,8 +440,7 @@ public class MathCalculator extends CordovaPlugin {
                             callbackContext.sendPluginResult(result);
                         }
                     };
-                 timer.scheduleAtFixedRate(task, 0, 100);
-
+                 that.timer.scheduleAtFixedRate(timerTask, 0, 1000);
               }
             });            
         }
