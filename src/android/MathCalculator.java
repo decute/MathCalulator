@@ -257,13 +257,14 @@ public class MathCalculator extends CordovaPlugin {
            getPermission(deviceFound);
            if(connection!=null){
                  try{
-                    // String command = "VER?\r\n";
-                    // if(args != null) {
-                    //     command = args.getJSONObject(0).getString("command");
-                    // } else {
-                    //     callbackContext.error("Command Send null");
-                    // }                
-                    byte[] buf = args.getJSONObject(0).getString("command").getBytes();
+                    String command = "VER?\r\n";
+                    if(args != null) {
+                        command = args.getJSONObject(0).getString("command");
+                        command = command + "\r\n";
+                    } else {
+                        callbackContext.error("Command Send null");
+                    }                
+                    byte[] buf = command.getBytes();
                     connection.bulkTransfer(endpointWrite, buf, buf.length, lTIMEOUT);
                     int dataLen = endpointRead.getMaxPacketSize();
                     byte[] data = new byte[dataLen];
