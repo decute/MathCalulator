@@ -90,8 +90,7 @@ public class MathCalculator extends CordovaPlugin {
             this.closeUsbConnection(callbackContext);
             return true;
         }else if(action.equals("sendCommand")) {
-            String command = args.getString(0);
-            this.sendCommand(command,callbackContext);
+            this.sendCommand(args,callbackContext);
             return true;
         }else if(action.equals("getUsbDevice")) {
             this.getUsbDevice(callbackContext);
@@ -256,24 +255,19 @@ public class MathCalculator extends CordovaPlugin {
         }else {
            getPermission(deviceFound);
            if(connection!=null){
-                //String command = (args==null) ? "ISN?\r\n" : args;
-                String command = "VER?\r\n";
-                
-                if(x){
-                    command = "VER?\r\n";
-                    x = false;
-                }else{
-                    command = "FPGA_VER?\r\n";
-                    x = true;
-                }
-                
-                byte[] buf = command.getBytes(StandardCharsets.UTF_8);
-                int dataLength = buf.length;
-                int res = connection.bulkTransfer(endpointWrite,buf, dataLength, lTIMEOUT);
-                byte[] sn_data = new byte[64];
-                int r = connection.bulkTransfer(endpointRead, sn_data, sn_data.length, lTIMEOUT);
+                 String command = "VER?\r\n";
+                 if(args != null) {
+                     command = args.getJSONObject(0).getString("command");
+                 } else {
+                     callbackContext.error("Command Send null");
+                 }                
+                byte[] buf = command.getBytes();
+                connection.bulkTransfer(endpointWrite, buf, buf.length, lTIMEOUT);
+                int dataLen = endpointRead.getMaxPacketSize();
+                byte[] data = new byte[dataLen];
+                int r =  connection.bulkTransfer(endpointRead, data, dataLen, lTIMEOUT);
                 if (r >= 0) {
-                     callbackContext.success("DATA for command : " + command + "Data_Length : " + dataLength + "Response :" + new String(sn_data, StandardCharsets.UTF_8));
+                     callbackContext.success("DATA for command : " + command + "Data_Length : " + dataLength + "Response :" + new String(data, StandardCharsets.UTF_8));
                 }else{
                     callbackContext.error("Bulk Transfer read Failed"+ r + "write: "+ res);
                 }
