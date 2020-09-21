@@ -249,28 +249,32 @@ public class MathCalculator extends CordovaPlugin {
 
    
 
-    private void sendCommand(String args, CallbackContext callbackContext) {  
+    private void sendCommand(JSONArray args, CallbackContext callbackContext) {  
         if(deviceFound==null){
             callbackContext.error("Device Referenced not Found ... Please open the connection First" + deviceFound);
         }else {
            getPermission(deviceFound);
            if(connection!=null){
-                 String command = "VER?\r\n";
-                 if(args != null) {
-                     command = args.getJSONObject(0).getString("command");
-                 } else {
-                     callbackContext.error("Command Send null");
-                 }                
-                byte[] buf = command.getBytes();
-                connection.bulkTransfer(endpointWrite, buf, buf.length, lTIMEOUT);
-                int dataLen = endpointRead.getMaxPacketSize();
-                byte[] data = new byte[dataLen];
-                int r =  connection.bulkTransfer(endpointRead, data, dataLen, lTIMEOUT);
-                if (r >= 0) {
-                     callbackContext.success("DATA for command : " + command + "Data_Length : " + dataLength + "Response :" + new String(data, StandardCharsets.UTF_8));
-                }else{
-                    callbackContext.error("Bulk Transfer read Failed"+ r + "write: "+ res);
-                }
+                 try{
+                    String command = "VER?\r\n";
+                    if(args != null) {
+                        command = args.getJSONObject(0).getString("command");
+                    } else {
+                        callbackContext.error("Command Send null");
+                    }                
+                    byte[] buf = command.getBytes();
+                    connection.bulkTransfer(endpointWrite, buf, buf.length, lTIMEOUT);
+                    int dataLen = endpointRead.getMaxPacketSize();
+                    byte[] data = new byte[dataLen];
+                    int r =  connection.bulkTransfer(endpointRead, data, dataLen, lTIMEOUT);
+                    if (r >= 0) {
+                        callbackContext.success("DATA for command : " + command + "Data_Length : " + dataLen + "Response :" + new String(data, StandardCharsets.UTF_8));
+                    }else{
+                        callbackContext.error("Bulk Transfer read Failed"+ r);
+                    }
+                } catch(Exception ex) {
+                    callbackContext.error("Something went wrong" + ex);
+                }        
            }else{
                callbackContext.error("Please Open the USB Connection First"+ connection);
            }
