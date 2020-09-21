@@ -302,19 +302,23 @@ public class MathCalculator extends CordovaPlugin {
            }
     }
 
-    private static String bytesToHex(byte[] bytes) {
-        byte[] hexChars = new byte[(bytes.length/2) * 7];
-        for (int j = 0; j < (bytes.length/2); j+=2) {
-            int v1 = bytes[j] & 0xFF;
-            int v2 = bytes[j+1] & 0xFF;
-
-            hexChars[j*7 + 0] = '(';
-            hexChars[j*7 + 1] = HEX_ARRAY[v1 >>> 4];
-            hexChars[j*7 + 2] = HEX_ARRAY[v1 & 0x0F];
-            hexChars[j*7 + 3] = ',';
-            hexChars[j*7 + 4] = HEX_ARRAY[v2 >>> 4];
-            hexChars[j*7 + 5] = HEX_ARRAY[v2 & 0x0F];
-            hexChars[j*7 + 6] = ')';
+     private static String bytesToHex(byte[] bytes) {
+        byte[] hexChars = new byte[(bytes.length/4) * 11];
+        for (int j = 0; j < (bytes.length/4); j+=4) {
+            int v1 = (bytes[j+0] & 0xFF) + ((bytes[j+1] & 0xFF) << 8);
+            int v2 = (bytes[j+2] & 0xFF) + ((bytes[j+3] & 0xFF) << 8);
+ 
+            hexChars[j*11 + 0] = '(';
+            hexChars[j*11 + 1] = HEX_ARRAY[(v1 & 0xF000) >>> 12];
+            hexChars[j*11 + 2] = HEX_ARRAY[(v1 & 0x0F00) >>> 8];
+            hexChars[j*11 + 3] = HEX_ARRAY[(v1 & 0x00F0) >>> 4];
+            hexChars[j*11 + 4] = HEX_ARRAY[(v1 & 0x000F)];
+            hexChars[j*11 + 5] = ',';
+            hexChars[j*11 + 6] = HEX_ARRAY[(v2 & 0xF000) >>> 12];
+            hexChars[j*11 + 7] = HEX_ARRAY[(v2 & 0x0F00) >>> 8];
+            hexChars[j*11 + 8] = HEX_ARRAY[(v2 & 0x00F0) >>> 4];
+            hexChars[j*11 + 9] = HEX_ARRAY[(v2 & 0x000F)];
+            hexChars[j*11 + 10] = ')';
         }
         return new String(hexChars, StandardCharsets.UTF_8);
     }
