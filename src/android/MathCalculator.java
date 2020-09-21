@@ -29,6 +29,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import org.apache.cordova.PluginResult;
+import java.util.Arrays;
 
 /**
  * This class echoes a string called from JavaScript.
@@ -256,19 +257,19 @@ public class MathCalculator extends CordovaPlugin {
            getPermission(deviceFound);
            if(connection!=null){
                  try{
-                    String command = "VER?\r\n";
-                    if(args != null) {
-                        command = args.getJSONObject(0).getString("command");
-                    } else {
-                        callbackContext.error("Command Send null");
-                    }                
-                    byte[] buf = command.getBytes();
+                    // String command = "VER?\r\n";
+                    // if(args != null) {
+                    //     command = args.getJSONObject(0).getString("command");
+                    // } else {
+                    //     callbackContext.error("Command Send null");
+                    // }                
+                    byte[] buf = args.getJSONObject(0).getString("command").getBytes();
                     connection.bulkTransfer(endpointWrite, buf, buf.length, lTIMEOUT);
                     int dataLen = endpointRead.getMaxPacketSize();
                     byte[] data = new byte[dataLen];
                     int r =  connection.bulkTransfer(endpointRead, data, dataLen, lTIMEOUT);
                     if (r >= 0) {
-                        callbackContext.success("Buffer"+ buf +"DATA for command : " + command + "Data_Length : " + dataLen + "Response :" + new String(data, StandardCharsets.UTF_8));
+                        callbackContext.success("Buffer"+ Arrays.toString(buf) +"DATA for command : " + command + "Data_Length : " + dataLen + "Response :" + new String(data, StandardCharsets.UTF_8));
                     }else{
                         callbackContext.error("Bulk Transfer read Failed"+ r);
                     }
