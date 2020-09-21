@@ -269,7 +269,7 @@ public class MathCalculator extends CordovaPlugin {
                     byte[] data = new byte[dataLen];
                     int r =  connection.bulkTransfer(endpointRead, data, dataLen, lTIMEOUT);
                     if (r >= 0) {
-                        callbackContext.success("Buffer"+ Arrays.toString(buf) +"DATA for command : " + command + "Data_Length : " + dataLen + "Response :" + new String(data, StandardCharsets.UTF_8));
+                        callbackContext.success("Buffer"+ Arrays.toString(buf) + "Data_Length : " + dataLen + "Response :" + new String(data, StandardCharsets.UTF_8));
                     }else{
                         callbackContext.error("Bulk Transfer read Failed"+ r);
                     }
