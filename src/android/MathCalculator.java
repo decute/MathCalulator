@@ -65,6 +65,7 @@ public class MathCalculator extends CordovaPlugin {
   
     private static final String LOG_TAG = "MathCalculator";
     public int value = 0;
+    public static Boolean  x = true;
 
 
     @Override
@@ -255,7 +256,17 @@ public class MathCalculator extends CordovaPlugin {
         }else {
            getPermission(deviceFound);
            if(connection!=null){
-                String command = (args==null) ? "ISN?\r\n" : args;
+                //String command = (args==null) ? "ISN?\r\n" : args;
+                String command = "VER?\r\n";
+                
+                if(x){
+                    command = "VER?\r\n";
+                    x = false;
+                }else{
+                    command = "FPGA_VER?\r\n";
+                    x = true;
+                }
+                
                 byte[] buf = command.getBytes(StandardCharsets.UTF_8);
                 int dataLength = buf.length;
                 int res = connection.bulkTransfer(endpointWrite,buf, dataLength, lTIMEOUT);
