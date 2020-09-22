@@ -376,7 +376,7 @@ public class MathCalculator extends CordovaPlugin {
                             }
                         }
                     };
-                    that.timer.scheduleAtFixedRate(timerTask, 0, 10);
+                    that.timer.scheduleAtFixedRate(timerTask, 0, 30);
                 }
             }
         });
