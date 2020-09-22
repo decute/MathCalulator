@@ -68,6 +68,9 @@ public class MathCalculator extends CordovaPlugin {
     public int value = 0;
     public static Boolean  x = true;
 
+    private JSONArray mAscanData = null;
+    private int mAscanData_size = 0;
+
 
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
@@ -323,6 +326,26 @@ public class MathCalculator extends CordovaPlugin {
         return new String(hexChars, StandardCharsets.UTF_8);
     }
 
+     private void bytesToJSON(byte[] bytes) {
+        JSONObject jsonObj = null;
+        int i = 0;
+        while (i < bytes.length) {
+            int minVal = (bytes[i+0] & 0xFF) + ((bytes[i+1] & 0xFF) << 8);
+            int maxVal = (bytes[i+2] & 0xFF) + ((bytes[i+3] & 0xFF) << 8);
+
+            try {
+                jsonObj = new JSONObject();
+                jsonObj.put("x", mAscanData_size);
+                jsonObj.put("y", maxVal);
+                mAscanData.put(jsonObj);
+            } catch (JSONException e) {
+                printResult("json error:" + e);
+            }
+            i+=4;
+            mAscanData_size++;
+        }
+    }
+
     private void getAscan(CallbackContext callbackContext){
         if(deviceFound==null){
             callbackContext.success("Device Referenced not Found ... Please open the connection First" + deviceFound);
@@ -393,35 +416,45 @@ public class MathCalculator extends CordovaPlugin {
                     public void run() {
                      getPermission(deviceFound);
                     if (connection != null) {
+
+                        mAscanData = new JSONArray();
+                        mAscanData_size = 0;
                         int dataSize = endPointAscanRead.getMaxPacketSize();
                         byte[] data = new byte[dataSize];
 
                         //do the first read
                         int rval = connection.controlTransfer(0xC1, 0xFD, 0x00, 0x00, null, 0, lTIMEOUT);
-                        rval = connection.bulkTransfer(endPointAscanRead, data, dataSize, lTIMEOUT);
+                        rval =  connection.bulkTransfer(endPointAscanRead, data, dataSize, lTIMEOUT);
+                        //printResult("mAscanEpRead: " + data.length + " data: " + bytesToHex(data));
+
                         int ascanSize = (data[3] << 24) | (data[2] << 16) | (data[1] << 8) | data[0];
                         ascanSize *= 4;
-                        byte[] ascanData = new byte[ascanSize];
-                        for (int i = 0; i < (dataSize - 4); i++) {
-                            ascanData[i] = data[4 + i];
-                        }
 
-                       while (ascanData.length < ascanSize) {
-                            rval = connection.controlTransfer(0xC1, 0xFE, 0x00, 0x00, null, 0, lTIMEOUT);
-                            assert (rval >= 0);
-                            rval = connection.bulkTransfer(endPointAscanRead, data, dataSize, lTIMEOUT);
-                            assert (rval == dataSize);
+                        int cur_ascanSize = dataSize-4;
 
-                            int x = ascanData.length;
-                            if ((x + dataSize) > ascanSize) {
-                                dataSize -= ((x + dataSize) - ascanSize);
+                        bytesToJSON(data);
+                        mAscanData.remove(0);
+                        mAscanData_size--;
+
+                        while (cur_ascanSize < ascanSize) {
+                                rval = connection.controlTransfer(0xC1, 0xFE, 0x00, 0x00, null, 0, lTIMEOUT); assert(rval>=0);
+                                rval = connection.bulkTransfer(endPointAscanRead, data, dataSize, lTIMEOUT); assert(rval==dataSize);
+                                bytesToJSON(data);
+                                int overFlow = (cur_ascanSize+dataSize) - ascanSize;
+                                if (overFlow>0) {
+                                    Log.w(TAG, ""+overFlow);
+                                    dataSize -= overFlow;
+                                    for(int k=0; k<(overFlow/4); k++) {
+                                        Log.w(TAG, ""+overFlow);
+                                        mAscanData.remove(mAscanData.length()-1);
+                                        mAscanData_size--;
+                                    }
+                                }
+
+                                cur_ascanSize += dataSize;
                             }
-
-                            for (int i = 0; i < dataSize; i++) {
-                                ascanData[x + i] = data[i];
-                            }
-                            }           
-                            PluginResult result = new PluginResult(PluginResult.Status.OK, bytesToHex(ascanData));
+                            
+                            PluginResult result = new PluginResult(PluginResult.Status.OK, mAscanData);
                             result.setKeepCallback(true);
                             callbackContext.sendPluginResult(result);
                             } else {
