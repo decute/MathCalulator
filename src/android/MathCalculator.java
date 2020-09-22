@@ -320,17 +320,15 @@ public class MathCalculator extends CordovaPlugin {
 
 
    public void getContiniousAscan(final CallbackContext callbackContext) {
-        //final MathCalculator that = this;
+        final MathCalculator that = this;
         cordova.getThreadPool().execute(new Runnable() {   
            public void run() {
                if(deviceFound==null){
                      callbackContext.error("Device Referenced not Found ... Please open the connection First" + deviceFound);
                }else {
-                //   that.timer = new Timer(LOG_TAG, true);
-                //   TimerTask timerTask = new TimerTask() {
-                //     public void run() {
-                  while (true)
-                  {
+                  that.timer = new Timer(LOG_TAG, true);
+                  TimerTask timerTask = new TimerTask() {
+                    public void run() {         
                      getPermission(deviceFound);
                     if (connection != null) {
                         mAscanData = new JSONArray();
@@ -365,11 +363,9 @@ public class MathCalculator extends CordovaPlugin {
                             } else {
                                 callbackContext.error("Please Open the USB Connection First");
                             }    
+                    };
 
-                //         }
-                //     };
-
-                //   that.timer.scheduleAtFixedRate(timerTask, 0, 200);
+                  that.timer.scheduleAtFixedRate(timerTask, 0, 10);
                   }        
                }  
               }
