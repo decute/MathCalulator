@@ -329,7 +329,8 @@ public class MathCalculator extends CordovaPlugin {
                 //   that.timer = new Timer(LOG_TAG, true);
                 //   TimerTask timerTask = new TimerTask() {
                 //     public void run() {
-
+                  while (true)
+                  {
                      getPermission(deviceFound);
                     if (connection != null) {
                         mAscanData = new JSONArray();
@@ -369,7 +370,7 @@ public class MathCalculator extends CordovaPlugin {
                 //     };
 
                 //   that.timer.scheduleAtFixedRate(timerTask, 0, 200);
-                  
+                  }        
                }  
               }
             }); 
