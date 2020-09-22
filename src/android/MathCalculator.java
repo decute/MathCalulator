@@ -177,7 +177,7 @@ public class MathCalculator extends CordovaPlugin {
     }
 
     private void getUsbDevice(CallbackContext callbackContext) {     
-        callbackContext.success("PID AND VID IS"+targetProductID + "-----"+targetVendorID);
+            callbackContext.success("PID AND VID IS"+targetProductID + "-----"+targetVendorID);
     }
 
 
@@ -328,7 +328,8 @@ public class MathCalculator extends CordovaPlugin {
                }else {
                   that.timer = new Timer(LOG_TAG, true);
                   TimerTask timerTask = new TimerTask() {
-                    public void run() {         
+                    public void run() {
+
                      getPermission(deviceFound);
                     if (connection != null) {
                         mAscanData = new JSONArray();
@@ -363,10 +364,9 @@ public class MathCalculator extends CordovaPlugin {
                             } else {
                                 callbackContext.error("Please Open the USB Connection First");
                             }    
+                        }
                     };
-
                   that.timer.scheduleAtFixedRate(timerTask, 0, 10);
-                  }        
                }  
               }
             }); 
