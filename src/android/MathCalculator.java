@@ -417,7 +417,7 @@ public class MathCalculator extends CordovaPlugin {
                     if (connection != null) {
 
                         mAscanData = new JSONArray();
-                        mAscanData_size = 0;
+                        mAscanData_size = -1;
                         int dataSize = endPointAscanRead.getMaxPacketSize();
                         byte[] data = new byte[dataSize];
 
