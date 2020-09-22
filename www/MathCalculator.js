@@ -1,21 +1,16 @@
 var MathCalculator = {
 
-    coolMethod: function (arg0, success, error) {
-        cordova.exec(
-            success, 
-            error, 
-            'MathCalculator', 
-            'coolMethod', 
-            [arg0]);
-    },
-    add : function (arg0, success, error) {
-        cordova.exec(success, error, 'MathCalculator', 'add', [arg0]);
-    },
     findUsbDevices : function (success, error) {
         cordova.exec(success, error, 'MathCalculator', 'findUsbDevices', []);
     },
+    isUsbDeviceConnected : function (success, error) {
+        cordova.exec(success, error, 'MathCalculator', 'isUsbDeviceConnected', []);
+    },
     setUsbDevice : function (arg0, success, error) {
         cordova.exec(success, error, 'MathCalculator', 'setUsbDevice', [arg0]);
+    },
+    getUsbDevice : function (success, error) {
+        cordova.exec(success, error, 'MathCalculator', 'getUsbDevice', []);
     },
     openUsbConnection : function (success, error) {
         cordova.exec(success, error, 'MathCalculator', 'openUsbConnection', []);
@@ -26,21 +21,12 @@ var MathCalculator = {
     sendCommand : function (arg0, success, error) {
         cordova.exec(success, error, 'MathCalculator', 'sendCommand', [arg0]);
     },
-    getUsbDevice : function (success, error) {
-        cordova.exec(success, error, 'MathCalculator', 'getUsbDevice', []);
-    },
-    isUsbDeviceConnected : function (success, error) {
-        cordova.exec(success, error, 'MathCalculator', 'isUsbDeviceConnected', []);
-    },
-    openAscanUsbConnection : function (success, error) {
-        cordova.exec(success, error, 'MathCalculator', 'openAscanUsbConnection', []);
-    },
     getAscan : function (success, error) {
         cordova.exec(success, error, 'MathCalculator', 'getAscan', []);
     },
     getContiniousAscan : function (success, error) {
         cordova.exec(success, error, 'MathCalculator', 'getContiniousAscan', []);
-    }
+    } 
   };
 
   MathCalculator.ERROR_CODES = {
