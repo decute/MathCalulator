@@ -339,7 +339,6 @@ public class MathCalculator extends CordovaPlugin {
                 jsonObj.put("y", maxVal);
                 mAscanData.put(jsonObj);
             } catch (JSONException e) {
-                printResult("json error:" + e);
             }
             i+=4;
             mAscanData_size++;
@@ -442,10 +441,8 @@ public class MathCalculator extends CordovaPlugin {
                                 bytesToJSON(data);
                                 int overFlow = (cur_ascanSize+dataSize) - ascanSize;
                                 if (overFlow>0) {
-                                    Log.w(TAG, ""+overFlow);
                                     dataSize -= overFlow;
                                     for(int k=0; k<(overFlow/4); k++) {
-                                        Log.w(TAG, ""+overFlow);
                                         mAscanData.remove(mAscanData.length()-1);
                                         mAscanData_size--;
                                     }
@@ -453,7 +450,7 @@ public class MathCalculator extends CordovaPlugin {
 
                                 cur_ascanSize += dataSize;
                             }
-                            
+
                             PluginResult result = new PluginResult(PluginResult.Status.OK, mAscanData);
                             result.setKeepCallback(true);
                             callbackContext.sendPluginResult(result);
